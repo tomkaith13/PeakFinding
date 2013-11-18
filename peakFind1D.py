@@ -45,16 +45,33 @@ class PeakFinder(object):
         else:
             return self.OneDPeak(mid+1, end)  
         
-    def TwoDPeak(self, rlow, rhigh, clow, chigh):
+    def TwoDPeak(self, clow, chigh):
         """ Find a 2d peak in O(log(log n)) """
+        PeakLoc = []
         
         """ boundary conditions"""
         if clow == chigh:
+            # If this is the last            
             cPeak = OneDColPeak(clow,self.data)
-            return cPeak
+            PeakLoc.extend((cPeak[0],clow))
+            PeakLoc.append(cPeak[1])
+            return PeakLoc
         
         mid = (chigh - clow)//2 
+        mid = clow + mid
+        print 'mid is:',mid
         cPeak = OneDColPeak(mid,self.data)
+        row = cPeak[0]
+        
+        if self.data[row][mid] >= self.data[row][mid - 1] and self.data[row][mid] >= self.data[row][mid + 1]:
+            PeakLoc.extend((row,mid))
+            PeakLoc.append(self.data[row][mid])
+            return PeakLoc
+        elif self.data[row][mid] < self.data[row][mid - 1]:
+            return self.TwoDPeak(clow, mid - 1)
+        else:
+            return self.TwoDPeak(mid + 1, chigh)
+            
         
         
         
@@ -64,7 +81,7 @@ class PeakFinder(object):
         item=self.data[0]
         
         if type(item) == list:
-            return self.TwoDPeak(0,len(self.data) - 1,0,len(self.data[0]) - 1)
+            return self.TwoDPeak(0,len(self.data[0]) - 1)
         else:            
             return self.OneDPeak(0,len(self.data) - 1)
         
@@ -91,7 +108,11 @@ def main():
     peak.print_data()
     i = peak.find_peak()
     
-    print 'new peak:',i[1]
+    print 'peak Location is:',i
+    if len(i) == 3:
+        print 'new peak:',i[2]
+    else:
+        print 'new peak:',i[1]
     
     
 if __name__ == "__main__":
